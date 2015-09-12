@@ -1,4 +1,4 @@
-if Code.ensure_loaded?(Mariaex.Connection) do
+if Code.ensure_loaded?(Mysqlex.Connection) do
 
   defmodule Ecto.Adapters.MySQL.Connection do
     @moduledoc false
@@ -11,7 +11,7 @@ if Code.ensure_loaded?(Mariaex.Connection) do
 
     def connect(opts) do
       opts = Keyword.update(opts, :port, @default_port, &normalize_port/1)
-      Mariaex.Connection.start_link(opts)
+      Mysqlex.Connection.start_link(opts)
     end
 
     def query(conn, sql, params, opts \\ []) do
@@ -22,7 +22,7 @@ if Code.ensure_loaded?(Mariaex.Connection) do
         value -> value
       end
 
-      case Mariaex.Connection.query(conn, sql, params, opts) do
+      case Mysqlex.Connection.query(conn, sql, params, opts) do
         {:ok, res}        -> {:ok, Map.from_struct(res)}
         {:error, _} = err -> err
       end
@@ -35,20 +35,20 @@ if Code.ensure_loaded?(Mariaex.Connection) do
       Application.get_env(:ecto, :json_library)
     end
 
-    def to_constraints(%Mariaex.Error{mariadb: %{code: 1062, message: message}}) do
+    def to_constraints(%Mysqlex.Error{mariadb: %{code: 1062, message: message}}) do
       case :binary.split(message, " for key ") do
         [_, quoted] -> [unique: strip_quotes(quoted)]
         _ -> []
       end
     end
-    def to_constraints(%Mariaex.Error{mariadb: %{code: code, message: message}})
+    def to_constraints(%Mysqlex.Error{mariadb: %{code: code, message: message}})
         when code in [1451, 1452] do
       case :binary.split(message, [" CONSTRAINT ", " FOREIGN KEY "], [:global]) do
         [_, quoted, _] -> [foreign_key: strip_quotes(quoted)]
         _ -> []
       end
     end
-    def to_constraints(%Mariaex.Error{}),
+    def to_constraints(%Mysqlex.Error{}),
       do: []
 
     defp strip_quotes(quoted) do

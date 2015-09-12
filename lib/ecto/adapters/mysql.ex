@@ -81,7 +81,7 @@ defmodule Ecto.Adapters.MySQL do
   """
 
   # Inherit all behaviour from Ecto.Adapters.SQL
-  use Ecto.Adapters.SQL, :mariaex
+  use Ecto.Adapters.SQL, :mysqlex
 
   # And provide a custom storage implementation
   @behaviour Ecto.Adapter.Storage
