@@ -35,13 +35,13 @@ if Code.ensure_loaded?(Mysqlex.Connection) do
       Application.get_env(:ecto, :json_library)
     end
 
-    def to_constraints(%Mysqlex.Error{mariadb: %{code: 1062, message: message}}) do
+    def to_constraints(%Mysqlex.Error{mysqlex: %{code: 1062, message: message}}) do
       case :binary.split(message, " for key ") do
         [_, quoted] -> [unique: strip_quotes(quoted)]
         _ -> []
       end
     end
-    def to_constraints(%Mysqlex.Error{mariadb: %{code: code, message: message}})
+    def to_constraints(%Mysqlex.Error{mysqlex: %{code: code, message: message}})
         when code in [1451, 1452] do
       case :binary.split(message, [" CONSTRAINT ", " FOREIGN KEY "], [:global]) do
         [_, quoted, _] -> [foreign_key: strip_quotes(quoted)]
